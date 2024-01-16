@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-function searchImages(query) {
+async function searchImages(query) {
   const searchParams = {
     key: '41530173-f95b78bdec41263a85620f647',
     q: query,
@@ -28,25 +28,21 @@ function searchImages(query) {
     safesearch: 'true',
   };
 
-  fetch(`${BASE_URL}/?${new URLSearchParams(searchParams)}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
-      return response.json();
-    })
-    .then(data => {
-      loader.style.display = 'none';
-      loader.classList.remove('loader--active');
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/?${new URLSearchParams(searchParams)}`
+    );
 
-      displayImages(data.hits);
-    })
-    .catch(() => {
-      loader.style.display = 'none';
-      loader.classList.remove('loader--active');
+    loader.style.display = 'none';
+    loader.classList.remove('loader--active');
 
-      showErrorToast();
-    });
+    displayImages(data.hits);
+  } catch (error) {
+    loader.style.display = 'none';
+    loader.classList.remove('loader--active');
+
+    showErrorToast();
+  }
 
   function displayImages(images) {
     galleryContainer.innerHTML = '';
