@@ -36,7 +36,7 @@ async function searchImages(query) {
     loader.style.display = 'none';
     loader.classList.remove('loader--active');
 
-    displayImages(data.hits);
+    displayImages(response.data); // Виправлено: передача response.data замість data.hits
   } catch (error) {
     loader.style.display = 'none';
     loader.classList.remove('loader--active');
@@ -44,11 +44,11 @@ async function searchImages(query) {
     showErrorToast();
   }
 
-  function displayImages(images) {
+  function displayImages(data) {
     galleryContainer.innerHTML = '';
 
-    if (images.length > 0) {
-      const imageCards = images.map(image => {
+    if (data.hits.length > 0) {
+      const imageCards = data.hits.map(image => {
         const card = document.createElement('div');
         card.classList.add('card');
 
