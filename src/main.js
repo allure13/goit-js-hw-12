@@ -56,14 +56,17 @@ async function searchImages(query) {
     );
 
     loader.style.display = 'none';
-    loader.classList.remove('loader--active');
+    // loader.classList.remove('loader--active');
 
     displayImages(response.data, perPage);
   } catch (error) {
     loader.style.display = 'none';
-    loader.classList.remove('loader--active');
+    // loader.classList.remove('loader--active');
 
     showErrorToast();
+  } finally {
+    loader.style.display = 'none';
+    loader.classList.remove('loader--active');
   }
 
   function displayImages(data, perPage) {
@@ -75,7 +78,7 @@ async function searchImages(query) {
         const largeImageLink = document.createElement('a');
         largeImageLink.href = image.largeImageURL;
         largeImageLink.dataset.lightbox = 'gallery';
-        largeImageLink.setAttribute('data-title', image.tags);
+        // largeImageLink.setAttribute('data-title', image.tags);
 
         const img = document.createElement('img');
         img.src = image.webformatURL;
@@ -128,12 +131,22 @@ async function searchImages(query) {
           message: "We're sorry, but you've reached the end of search results.",
         });
       }
-      currentPage += 1;
+      currentPage += 1; // додаю сторінку при натисканні на кнопку
     } else {
       showNoImagesFoundToast();
 
       fetchBtn.style.display = 'none';
     }
+    // Отримання висоти однієї карточки галереї
+    const cardHeight = document
+      .querySelector('.card')
+      .getBoundingClientRect().height;
+
+    // Плавна прокрутка сторінки на дві висоти карточки галереї
+    window.scrollBy({
+      top: cardHeight * 2, // Прокрутити на дві висоти карточки
+      behavior: 'smooth', // Зробити прокрутку плавною
+    });
   }
 }
 
