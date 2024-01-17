@@ -15,6 +15,8 @@ let currentPage = 1;
 let searchQuery = '';
 const totalImages = Math.ceil(totalHits / perPage);
 
+let clearImagesOnSearch = true;
+
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('.form').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -23,12 +25,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const searchQuery = document.querySelector('.input').value;
     currentPage = 1;
+    clearImagesOnSearch = true;
     searchImages(searchQuery);
   });
 });
 
 fetchBtn.addEventListener('click', async () => {
   loader.style.display = 'block';
+  clearImagesOnSearch = false;
   searchImages(searchQuery);
   if (currentPage > totalImages) {
     fetchBtn.style.display = 'none';
@@ -56,12 +60,10 @@ async function searchImages(query) {
     );
 
     loader.style.display = 'none';
-    // loader.classList.remove('loader--active');
 
     displayImages(response.data, perPage);
   } catch (error) {
     loader.style.display = 'none';
-    // loader.classList.remove('loader--active');
 
     showErrorToast();
   } finally {
@@ -71,6 +73,9 @@ async function searchImages(query) {
 
   function displayImages(data, perPage) {
     if (data.hits.length > 0) {
+      if (clearImagesOnSearch) {
+        galleryContainer.innerHTML = '';
+      }
       const imageCards = data.hits.map(image => {
         const card = document.createElement('div');
         card.classList.add('card');
@@ -78,7 +83,6 @@ async function searchImages(query) {
         const largeImageLink = document.createElement('a');
         largeImageLink.href = image.largeImageURL;
         largeImageLink.dataset.lightbox = 'gallery';
-        // largeImageLink.setAttribute('data-title', image.tags);
 
         const img = document.createElement('img');
         img.src = image.webformatURL;
