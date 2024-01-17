@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     loader.style.display = 'block';
 
-    const searchQuery = document.querySelector('.input').value;
+    // Оновлення значення searchQuery
+    searchQuery = document.querySelector('.input').value;
+
     currentPage = 1;
     clearImagesOnSearch = true;
     searchImages(searchQuery);
@@ -34,13 +36,6 @@ fetchBtn.addEventListener('click', async () => {
   loader.style.display = 'block';
   clearImagesOnSearch = false;
   searchImages(searchQuery);
-  if (currentPage > totalImages) {
-    fetchBtn.style.display = 'none';
-    return iziToast.error({
-      title: 'Error',
-      message: "We're sorry, but you've reached the end of search results.",
-    });
-  }
 });
 
 async function searchImages(query) {
@@ -59,12 +54,9 @@ async function searchImages(query) {
       `${BASE_URL}/?${new URLSearchParams(searchParams)}`
     );
 
-    loader.style.display = 'none';
-
     displayImages(response.data, perPage);
+    updateLoadMoreButtonVisibility(response.data, perPage);
   } catch (error) {
-    loader.style.display = 'none';
-
     showErrorToast();
   } finally {
     loader.style.display = 'none';
@@ -76,6 +68,7 @@ async function searchImages(query) {
       if (clearImagesOnSearch) {
         galleryContainer.innerHTML = '';
       }
+
       const imageCards = data.hits.map(image => {
         const card = document.createElement('div');
         card.classList.add('card');
@@ -130,10 +123,7 @@ async function searchImages(query) {
         fetchBtn.style.display = 'none';
       }
       if (currentPage * perPage >= data.totalHits) {
-        iziToast.info({
-          title: 'End of Search Results',
-          message: "We're sorry, but you've reached the end of search results.",
-        });
+        showInfoToast();
       }
       currentPage += 1; // додаю сторінку при натисканні на кнопку
     } else {
@@ -152,6 +142,21 @@ async function searchImages(query) {
       behavior: 'smooth', // Зробити прокрутку плавною
     });
   }
+  function updateLoadMoreButtonVisibility(data, perPage) {
+    const loadMoreButton = document.querySelector('.load-more');
+    loadMoreButton.style.display = 'block';
+
+    if (data.hits.length < perPage || currentPage * perPage >= data.totalHits) {
+      loadMoreButton.style.display = 'none';
+    }
+  }
+}
+
+function showInfoToast() {
+  iziToast.info({
+    title: 'End of Search Results',
+    message: "We're sorry, but you've reached the end of search results.",
+  });
 }
 
 function showErrorToast() {
