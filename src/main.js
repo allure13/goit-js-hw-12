@@ -10,10 +10,10 @@ const loader = document.querySelector('.loader');
 const fetchBtn = document.querySelector('.load-more');
 
 const perPage = 40;
-const totalHits = 500;
 let currentPage = 1;
 let searchQuery = '';
-const totalImages = Math.ceil(totalHits / perPage);
+let totalHits = 0;
+let totalPages = 0;
 
 let clearImagesOnSearch = true;
 
@@ -24,11 +24,15 @@ document.addEventListener('DOMContentLoaded', function () {
     loader.style.display = 'block';
 
     // Оновлення значення searchQuery
-    searchQuery = document.querySelector('.input').value;
+    const newSearchQuery = document.querySelector('.input').value;
 
-    currentPage = 1;
-    clearImagesOnSearch = true;
-    searchImages(searchQuery);
+    // Перевірка, чи змінилася пошукова фраза
+    if (newSearchQuery !== searchQuery) {
+      currentPage = 1;
+      clearImagesOnSearch = true;
+      searchQuery = newSearchQuery;
+      searchImages(searchQuery);
+    }
   });
 });
 
@@ -53,9 +57,9 @@ async function searchImages(query) {
     const response = await axios.get(
       `${BASE_URL}/?${new URLSearchParams(searchParams)}`
     );
-
+    totalHits = response.data.totalHits;
+    totalPages = Math.ceil(totalHits / perPage);
     displayImages(response.data, perPage);
-    updateLoadMoreButtonVisibility(response.data, perPage);
   } catch (error) {
     showErrorToast();
   } finally {
@@ -63,7 +67,7 @@ async function searchImages(query) {
     loader.classList.remove('loader--active');
   }
 
-  function displayImages(data, perPage) {
+  function displayImages(data) {
     if (data.hits.length > 0) {
       if (clearImagesOnSearch) {
         galleryContainer.innerHTML = '';
@@ -114,17 +118,13 @@ async function searchImages(query) {
       const lightbox = new SimpleLightbox('.gallery a', {});
       lightbox.refresh();
 
-      document.querySelector('.load-more').style.display = 'block';
+      document.querySelector('.load-more').style.display =
+        currentPage < totalPages ? 'block' : 'none';
 
-      if (
-        data.hits.length < perPage ||
-        currentPage * perPage >= data.totalHits
-      ) {
-        fetchBtn.style.display = 'none';
-      }
-      if (currentPage * perPage >= data.totalHits) {
+      if (currentPage >= totalPages) {
         showInfoToast();
       }
+
       currentPage += 1; // додаю сторінку при натисканні на кнопку
     } else {
       showNoImagesFoundToast();
@@ -142,20 +142,14 @@ async function searchImages(query) {
       behavior: 'smooth', // Зробити прокрутку плавною
     });
   }
-  function updateLoadMoreButtonVisibility(data, perPage) {
-    const loadMoreButton = document.querySelector('.load-more');
-    loadMoreButton.style.display = 'block';
-
-    if (data.hits.length < perPage || currentPage * perPage >= data.totalHits) {
-      loadMoreButton.style.display = 'none';
-    }
-  }
 }
 
 function showInfoToast() {
   iziToast.info({
     title: 'End of Search Results',
     message: "We're sorry, but you've reached the end of search results.",
+    position: 'topRight',
+    messageSize: 14,
   });
 }
 
@@ -163,6 +157,8 @@ function showErrorToast() {
   iziToast.error({
     title: 'Error',
     message: 'An error occurred. Please try again later.',
+    position: 'topRight',
+    messageSize: 14,
   });
 }
 
@@ -171,5 +167,7 @@ function showNoImagesFoundToast() {
     title: 'No Images Found',
     message:
       'Sorry, there are no images matching your search query. Please try again!',
+    position: 'topRight',
+    messageSize: 14,
   });
 }
