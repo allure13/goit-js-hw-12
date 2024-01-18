@@ -71,6 +71,7 @@ async function searchImages(query) {
     if (data.hits.length > 0) {
       if (clearImagesOnSearch) {
         galleryContainer.innerHTML = '';
+        clearImagesOnSearch = false;
       }
 
       const imageCards = data.hits.map(image => {
