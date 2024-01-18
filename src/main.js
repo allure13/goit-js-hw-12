@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Перевірка, чи змінилася пошукова фраза
     if (newSearchQuery !== searchQuery) {
       currentPage = 1;
-      clearImagesOnSearch = true;
       searchQuery = newSearchQuery;
+      galleryContainer.innerHTML = '';
       searchImages(searchQuery);
     }
   });
